@@ -3,7 +3,7 @@ from random import randint
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtSql import *
-from sqlite3 import *
+import sqlite3
 
 WIDTH = 1200
 LENGTH = 1500
@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         self.setGeometry(500, 500, WIDTH, LENGTH)
-        self.setWindowTitle("Запись в салон красоты")
+        self.setWindowTitle("Запись к врачу")
 
         # self.text_field = QTextEdit(self)
         # self.text_field.move(0, 100)
@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         self.specialist_button.resize(WIDTH // 3, LENGTH // 10)
         self.specialist_button.move(WIDTH // 3, LENGTH // 10)
 
-        self.service_button = QPushButton("Выбрать услугу", self)
+        self.service_button = QPushButton("Выбрать категорию приема", self)
         self.service_button.resize(WIDTH // 3, LENGTH // 10)
         self.service_button.move(WIDTH // 3, 3 * (LENGTH // 10))
 
@@ -67,8 +67,40 @@ class SpecialistWindow(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(500, 500, WIDTH, LENGTH)
-        self.setWindowTitle("Выбор специалиста")
+        con = sqlite3.connect("DateBase.sqlite")
+
+        # Создание курсора
+        cur = con.cursor()
+
+        # Выполнение запроса и получение всех результатов
+        result = cur.execute("""SELECT name FROM doctors""").fetchall()
+
+        # Вывод результатов на экран
+        for elem in result:
+            print(elem)
+
+        con.close()
+
+        '''db = QSqlDatabase.addDatabase("QSQLITE")
+        # Укажем имя базы данных
+        db.setDatabaseName("DataBase.sqlite")
+        # И откроем подключение
+        db.open()
+
+        # QTableView - виджет для отображения данных из базы
+        view = QTableView(self)
+        # Создадим объект QSqlTableModel,
+        # зададим таблицу, с которой он будет работать,
+        #  и выберем все данные
+        model = QSqlTableModel(self, db)
+        model.setTable("doctors")
+        model.select()
+
+        # Для отображения данных на виджете
+        # свяжем его и нашу модель данных
+        view.setModel(model)
+        view.move(10, 10)
+        view.resize(617, 315)'''
 
 
 class ServiceWindow(QWidget):
@@ -148,8 +180,6 @@ class AdminWindow(QWidget):
 
         self.setGeometry(300, 100, 650, 450)
         self.setWindowTitle('Пример работы с QtSql')
-
-
 
 
 if __name__ == '__main__':
