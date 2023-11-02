@@ -150,8 +150,9 @@ class AdminWindow(QMainWindow):
         cur = self.con.cursor()
         self.names_list.addItems([item[0] for item in cur.execute("SELECT name FROM doctors").fetchall()])
         self.new_button.clicked.connect(self.new_button_click)
-        self.pick_button.clicked.connect(self.pick_button_click)
         self.edit_button.clicked.connect(self.edit_button_click)
+        self.names_list.currentItemChanged.connect(self.change_info)
+        #self.delete_button.clicked.connect(self.delete_button_click)
         '''
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
@@ -200,6 +201,16 @@ class AdminWindow(QMainWindow):
 
     # self.setGeometry(300, 100, 650, 450)
     # self.setWindowTitle('Пример работы с QtSql')
+    def change_info(self):
+        print(self.names_list.currentRow())
+        self.con = sqlite3.connect("clinic.sqlite")
+        cur = self.con.cursor()
+        result = cur.execute("SELECT name, prof, education, experience FROM doctors "
+                             "WHERE name = '{}'".format("Мария")).fetchall()
+        self.name_line.setText(result[0][0])
+        self.prof_line.setText(result[0][1])
+        self.education_line.setText(result[0][2])
+        self.experiense_line.setText(result[0][3])
 
     def new_button_click(self):
         self.con = sqlite3.connect("clinic.sqlite")
@@ -212,16 +223,6 @@ class AdminWindow(QMainWindow):
         self.con.commit()
         cur.close()
 
-    def pick_button_click(self):
-        self.con = sqlite3.connect("clinic.sqlite")
-        cur = self.con.cursor()
-        result = cur.execute("SELECT name, prof, education, experience FROM doctors "
-                             "WHERE name = '{}'".format("Федя")).fetchall()
-        self.name_line.setText(result[0][0])
-        self.prof_line.setText(result[0][1])
-        self.education_line.setText(result[0][2])
-        self.experiense_line.setText(result[0][3])
-
     def edit_button_click(self):
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
@@ -232,6 +233,15 @@ class AdminWindow(QMainWindow):
                                                        self.prof_line.text(),
                                                        self.education_line.text(),
                                                        self.experiense_line.text(), "Лаврентий")).fetchall()
+        self.con.commit()
+        cur.close()
+
+    def delete_button_click(self):
+        self.con = sqlite3.connect("clinic.sqlite")
+        cur = self.con.cursor()
+        print(self.name_line.text())
+        print()
+        result = cur.execute("DELETE from doctorsWHERE name = '{}'".format(self.name_line.text())).fetchall()
         self.con.commit()
         cur.close()
 
