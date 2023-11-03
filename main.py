@@ -2,6 +2,8 @@ import sys
 from PyQt5.QtWidgets import *
 import sqlite3
 from PyQt5 import uic
+from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtCore import Qt
 
 WIDTH = 1200
 LENGTH = 1500
@@ -48,16 +50,23 @@ class MainWindow(QMainWindow):
         self.SpW.show()
 
     def service_button_click(self):
-        self.ServiceWindow = ServiceWindow()
-        self.ServiceWindow.show()
+        self.SerW = ServiceWindow()
+        self.SerW.show()
 
     def date_button_click(self):
-        self.DateWindow = DateWindow()
-        self.DateWindow.show()
+        self.DW = DateWindow()
+        self.DW.show()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Enter:
+            return True
 
     def login_button_click(self):
-        self.LoginWindow = LoginWindow()
-        self.LoginWindow.show()
+        password, ok_pressed = QInputDialog.getText(self, "Вход",
+                                                    "Введите код доступа:")
+        if ok_pressed and password == "admin":
+            self.AW = AdminWindow()
+            self.AW.show()
 
 
 class SpecialistWindow(QMainWindow):
@@ -114,13 +123,14 @@ class DateWindow(QWidget):
         self.setWindowTitle("Выбор даты")
 
 
+'''
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(500 + WIDTH // 3, 500 + LENGTH // 2, LOGIN_WIDTH, LOGIN_LENGTH)
+        self.setGeometry(300, 300, LOGIN_WIDTH, LOGIN_LENGTH)
         self.setWindowTitle("Вход")
 
         self.label = QLabel(self)
@@ -137,9 +147,11 @@ class LoginWindow(QWidget):
         self.check_pass_button.clicked.connect(self.check_pass_button_click)
 
     def check_pass_button_click(self):
-        if self.password.text() == "admin":
-            self.Admin = AdminWindow()
-            self.Admin.show()
+        name, ok_pressed = QInputDialog.getText(self, "Вход",
+                                                "Введите код доступа:")
+        if ok_pressed and self.password.text() == "admin":
+            self.AdminW = AdminWindow()
+            self.AdminW.show()'''
 
 
 class AdminWindow(QMainWindow):
@@ -152,7 +164,7 @@ class AdminWindow(QMainWindow):
         self.new_button.clicked.connect(self.new_button_click)
         self.edit_button.clicked.connect(self.edit_button_click)
         self.names_list.currentItemChanged.connect(self.change_info)
-        #self.delete_button.clicked.connect(self.delete_button_click)
+        # self.delete_button.clicked.connect(self.delete_button_click)
         '''
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
@@ -202,15 +214,19 @@ class AdminWindow(QMainWindow):
     # self.setGeometry(300, 100, 650, 450)
     # self.setWindowTitle('Пример работы с QtSql')
     def change_info(self):
-        print(self.names_list.currentRow())
+        print(self.names_list.currentItem().text())
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
         result = cur.execute("SELECT name, prof, education, experience FROM doctors "
-                             "WHERE name = '{}'".format("Мария")).fetchall()
+                             "WHERE name = '{}'".format(self.names_list.currentItem().text())).fetchall()
         self.name_line.setText(result[0][0])
         self.prof_line.setText(result[0][1])
         self.education_line.setText(result[0][2])
         self.experiense_line.setText(result[0][3])
+
+        # Если картинки нет, то QPixmap будет пустым,
+        # а исключения не будет
+        # Отображаем содержимое QPixmap в объекте QLabel
 
     def new_button_click(self):
         self.con = sqlite3.connect("clinic.sqlite")
@@ -222,6 +238,7 @@ class AdminWindow(QMainWindow):
         count = cur.execute(add_text)
         self.con.commit()
         cur.close()
+        self.names_list.addItem(self.name_line.text())
 
     def edit_button_click(self):
         self.con = sqlite3.connect("clinic.sqlite")
@@ -230,9 +247,10 @@ class AdminWindow(QMainWindow):
         result = cur.execute("UPDATE doctors "
                              "SET name = '{}',prof = '{}', education = '{}', experience = '{}' "
                              "WHERE name = '{}'".format(self.name_line.text(),
-                                                       self.prof_line.text(),
-                                                       self.education_line.text(),
-                                                       self.experiense_line.text(), "Лаврентий")).fetchall()
+                                                        self.prof_line.text(),
+                                                        self.education_line.text(),
+                                                        self.experiense_line.text(),
+                                                        self.names_list.currentItem().text())).fetchall()
         self.con.commit()
         cur.close()
 
@@ -254,6 +272,15 @@ class MakeReceptionBySpecialist(QWidget):
     def initUI(self):
         self.setGeometry(500, 500, WIDTH, LENGTH)
         self.setWindowTitle("Запись к врачу")
+
+        self.pixmap = QPixmap('icon.jpg')
+        # Если картинки нет, то QPixmap будет пустым,
+        # а исключения не будет
+        self.image = QLabel(self)
+        self.image.move(80, 60)
+        self.image.resize(250, 250)
+        # Отображаем содержимое QPixmap в объекте QLabel
+        self.image.setPixmap(self.pixmap)
 
 
 if __name__ == '__main__':
