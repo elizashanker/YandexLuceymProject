@@ -295,10 +295,7 @@ class MakeReceptionBySpecialist(QWidget):
 
 
 if __name__ == '__main__':
-    try:
-        app = QApplication(sys.argv)
-        ex = MainWindow()
-        ex.show()
-        sys.exit(app.exec())
-    except Exception as ex:
-        print(ex)
+    app = QApplication(sys.argv)
+    ex = MainWindow()
+    ex.show()
+    sys.exit(app.exec())
