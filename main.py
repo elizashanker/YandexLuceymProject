@@ -4,6 +4,7 @@ import sqlite3
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QDateTime
 
 WIDTH = 1200
 LENGTH = 1500
@@ -16,8 +17,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi("1.ui", self)
         self.specialist_button.clicked.connect(self.specialist_button_click)
-        self.service_button.clicked.connect(self.service_button_click)
-        self.date_button.clicked.connect(self.date_button_click)
         self.login_button.clicked.connect(self.login_button_click)
 
     def initUI(self):
@@ -48,18 +47,6 @@ class MainWindow(QMainWindow):
     def specialist_button_click(self):
         self.SpW = SpecialistWindow()
         self.SpW.show()
-
-    def service_button_click(self):
-        self.SerW = ServiceWindow()
-        self.SerW.show()
-
-    def date_button_click(self):
-        self.DW = DateWindow()
-        self.DW.show()
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Enter:
-            return True
 
     def login_button_click(self):
         password, ok_pressed = QInputDialog.getText(self, "Вход",
@@ -103,26 +90,6 @@ class SpecialistWindow(QMainWindow):
         self.make_abs.show()
 
 
-class ServiceWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(500, 500, WIDTH, LENGTH)
-        self.setWindowTitle("Выбор услуги")
-
-
-class DateWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(500, 500, WIDTH, LENGTH)
-        self.setWindowTitle("Выбор даты")
-
-
 '''
 class LoginWindow(QWidget):
     def __init__(self):
@@ -163,9 +130,12 @@ class AdminWindow(QMainWindow):
         self.names_list.addItems([item[0] for item in cur.execute("SELECT name FROM doctors").fetchall()])
         self.new_button.clicked.connect(self.new_button_click)
         self.edit_button.clicked.connect(self.edit_button_click)
-        self.names_list.currentItemChanged.connect(self.change_info)
-        # self.delete_button.clicked.connect(self.delete_button_click)
-        '''
+        self.names_list.currentItemChanged.connect(self.change_name_info)
+        # self.delete_button.clicked.connect(self.delete_button_click) #не работает
+        self.date_add_button.clicked.connect(self.date_add_button_click)  # тоже не особо работает
+        self.dates_list.currentItemChanged.connect(self.change_date_info)
+        self.date_delete_button.clicked.connect(self.date_delete_button_click)
+        '''dfd
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
         self.comboBox.addItems([item[0] for item in cur.execute("SELECT title FROM profs").fetchall()])
@@ -213,7 +183,7 @@ class AdminWindow(QMainWindow):
 
     # self.setGeometry(300, 100, 650, 450)
     # self.setWindowTitle('Пример работы с QtSql')
-    def change_info(self):
+    def change_name_info(self):
         print(self.names_list.currentItem().text())
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
@@ -223,6 +193,11 @@ class AdminWindow(QMainWindow):
         self.prof_line.setText(result[0][1])
         self.education_line.setText(result[0][2])
         self.experiense_line.setText(result[0][3])
+
+        request = cur.execute("SELECT title FROM dates").fetchall()
+        print(request[0][0])
+        if len(request) != 0:
+            self.dates_list.addItems([item[0] for item in request])
 
         # Если картинки нет, то QPixmap будет пустым,
         # а исключения не будет
@@ -242,11 +217,12 @@ class AdminWindow(QMainWindow):
 
     def edit_button_click(self):
         self.con = sqlite3.connect("clinic.sqlite")
+        name = self.name_line.text()
         cur = self.con.cursor()
         print(self.name_line.text(), self.prof_line.text(), self.education_line.text(), self.experiense_line.text())
         result = cur.execute("UPDATE doctors "
                              "SET name = '{}',prof = '{}', education = '{}', experience = '{}' "
-                             "WHERE name = '{}'".format(self.name_line.text(),
+                             "WHERE name = '{}'".format(name,
                                                         self.prof_line.text(),
                                                         self.education_line.text(),
                                                         self.experiense_line.text(),
@@ -262,6 +238,41 @@ class AdminWindow(QMainWindow):
         result = cur.execute("DELETE from doctorsWHERE name = '{}'".format(self.name_line.text())).fetchall()
         self.con.commit()
         cur.close()
+
+    def change_date_info(self):
+        try:
+            form = "dd.MM.yyyy HH.mm"
+            now = QDateTime.fromString(self.dates_list.currentItem().text(), form)
+            print(now)
+            print(self.dates_list.currentItem().text())
+            self.date_choose.setDateTime(now)
+        except Exception as ex:
+            print(ex)
+
+    def date_add_button_click(self):
+        self.con = sqlite3.connect("clinic.sqlite")
+        cur = self.con.cursor()
+        add_text = ("INSERT INTO dates (title) "
+                    "VALUES ('{}')".format(self.date_choose.text()))
+        print(add_text)
+        count = cur.execute(add_text)
+        self.con.commit()
+        cur.close()
+        self.dates_list.addItems([self.date_choose.text()])
+
+    def date_delete_button_click(self):
+        self.con = sqlite3.connect("clinic.sqlite")
+        cur = self.con.cursor()
+        cur_item = self.dates_list.currentItem().text()
+        try:
+            if cur_item.replace(" ", "") != "":
+                request = "DELETE from dates WHERE title = '{}'".format(self.dates_list.currentItem().text())
+                print(request)
+                result = cur.execute(request).fetchall()
+                self.con.commit()
+                cur.close()
+        except Exception as ex:
+            print(ex)
 
 
 class MakeReceptionBySpecialist(QWidget):
@@ -284,7 +295,10 @@ class MakeReceptionBySpecialist(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = MainWindow()
-    ex.show()
-    sys.exit(app.exec())
+    try:
+        app = QApplication(sys.argv)
+        ex = MainWindow()
+        ex.show()
+        sys.exit(app.exec())
+    except Exception as ex:
+        print(ex)
