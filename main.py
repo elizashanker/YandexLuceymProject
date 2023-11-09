@@ -16,40 +16,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi("1.ui", self)
+
+        self.sizes = QImage("logo.jpg")
+        self.label.resize(self.sizes.width(), self.sizes.height())
+        print(self.sizes.width(), self.sizes.height())
+        self.pixmap = QPixmap("logo.jpg")
+        self.label.setPixmap(self.pixmap)
+
         self.specialist_button.clicked.connect(self.specialist_button_click)
         self.login_button.clicked.connect(self.login_button_click)
 
-    def initUI(self):
-        pass
-
-    '''self.setGeometry(500, 500, WIDTH, LENGTH)
-    self.setWindowTitle("Запись к врачу")
-
-    # self.text_field = QTextEdit(self)
-    # self.text_field.move(0, 100)
-
-    self.specialist_button = QPushButton("Выбрать специалиста", self)
-    self.specialist_button.resize(WIDTH // 3, LENGTH // 10)
-    self.specialist_button.move(WIDTH // 3, LENGTH // 10)
-
-    self.service_button = QPushButton("Выбрать категорию приема", self)
-    self.service_button.resize(WIDTH // 3, LENGTH // 10)
-    self.service_button.move(WIDTH // 3, 3 * (LENGTH // 10))
-
-    self.date_button = QPushButton("Выбрать дату и время", self)
-    self.date_button.resize(WIDTH // 3, LENGTH // 10)
-    self.date_button.move(WIDTH // 3, 5 * (LENGTH // 10))
-
-    self.login_button = QPushButton("Вход", self)
-    self.login_button.resize(WIDTH // 3, LENGTH // 10)
-    self.login_button.move(WIDTH // 3, 7 * (LENGTH // 10))'''
-
     def specialist_button_click(self):
-        try:
-            self.MR = MakeReception()
-            self.MR.show()
-        except Exception as ex:
-            print(ex)
+        self.MR = MakeReception()
+        self.MR.show()
 
     def login_button_click(self):
         password, ok_pressed = QInputDialog.getText(self, "Вход",
@@ -57,37 +36,6 @@ class MainWindow(QMainWindow):
         if ok_pressed and password == "admin":
             self.AW = AdminWindow()
             self.AW.show()
-
-
-'''
-class LoginWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(300, 300, LOGIN_WIDTH, LOGIN_LENGTH)
-        self.setWindowTitle("Вход")
-
-        self.label = QLabel(self)
-        self.label.setText("Введите код доступа:")
-        self.label.move(LOGIN_WIDTH // 5, LOGIN_LENGTH // 5)
-
-        self.password = QLineEdit(self)
-        self.password.move(LOGIN_WIDTH // 5, 3 * (LOGIN_LENGTH // 7))
-
-        self.check_pass_button = QPushButton("Проверить", self)
-        # self.check_pass_button.resize(WIDTH // 3, LENGTH // 10)
-        self.check_pass_button.move(LOGIN_WIDTH // 5, 5 * (LOGIN_LENGTH // 7))
-
-        self.check_pass_button.clicked.connect(self.check_pass_button_click)
-
-    def check_pass_button_click(self):
-        name, ok_pressed = QInputDialog.getText(self, "Вход",
-                                                "Введите код доступа:")
-        if ok_pressed and self.password.text() == "admin":
-            self.AdminW = AdminWindow()
-            self.AdminW.show()'''
 
 
 class AdminWindow(QMainWindow):
@@ -108,66 +56,23 @@ class AdminWindow(QMainWindow):
         self.comboBox.currentTextChanged.connect(self.change_date_info)
         self.photo_button.clicked.connect(self.photo_button_click)
         self.text_button.clicked.connect(self.text_button_click)
-        '''dfd
-        self.con = sqlite3.connect("clinic.sqlite")
-        cur = self.con.cursor()
-        self.comboBox.addItems([item[0] for item in cur.execute("SELECT title FROM profs").fetchall()])
-        self.pushButton_2.clicked.connect(self.date_filter)
-
-    def date_filter(self):
-        cur = self.con.cursor()
-        print({self.comboBox.currentIndex() + 1})
-        result = cur.execute(f"""
-                                     SELECT DISTINCT doctors.name, profs.title, doctors.prof
-                                     FROM doctors, profs JOIN doctors_profs
-                                     ON doctors.id = doctors_profs.doctors_id AND
-                                             profs.id = doctors_profs.profs_id
-                                     WHERE profs_id = {self.comboBox.currentIndex() + 1}
-                                     """).fetchall()
-        self.tableWidget.setRowCount(len(result))
-        self.tableWidget.setColumnCount(len(result[0]))
-        for i, elem in enumerate(result):
-            for j, val in enumerate(elem):
-                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))'''
-
-    def initUI(self):
-        pass
-
-    """db = QSqlDatabase.addDatabase("QSQLITE")
-     # Укажем имя базы данных
-     db.setDatabaseName("DataBase.sqlite")
-     # И откроем подключение
-     db.open()
-
-     # QTableView - виджет для отображения данных из базы
-     view = QTableView(self)
-     # Создадим объект QSqlTableModel,
-     # зададим таблицу, с которой он будет работать,
-     #  и выберем все данные
-     model = QSqlTableModel(self, db)
-     model.setTable("classes")
-     model.select()
-
-     # Для отображения данных на виджете
-     # свяжем его и нашу модель данных
-     view.setModel(model)
-     view.move(10, 10)
-     view.resize(617, 315)"""
 
     def clean_all(self):
         self.name_line.setText("")
         self.prof_line.setText("")
         self.education_line.setText("")
         self.experiense_line.setText("")
-        self.dates_list.clear()
-        self.comboBox.clear()
-        self.comboBox.addItem("Выбрать")
+        if self.dates_list.count() != 0:
+            self.dates_list.clear()
+        if self.comboBox.count() != 1:
+            self.comboBox.clear()
+            self.comboBox.addItem("Выбрать")
 
     # self.setGeometry(300, 100, 650, 450)
     # self.setWindowTitle('Пример работы с QtSql')
     def change_name_info(self):
-
-            self.clean_all()
+        self.clean_all()
+        if self.names_list.currentItem().text() != "Выбрать":
             self.con = sqlite3.connect("clinic.sqlite")
             cur = self.con.cursor()
             name = self.names_list.currentItem().text()
@@ -178,21 +83,17 @@ class AdminWindow(QMainWindow):
             self.education_line.setText(result[0][2])
             self.experiense_line.setText(result[0][3])
 
-            id = cur.execute("SELECT id FROM doctors "
-                            "WHERE name = '{}'".format(name)).fetchall()
+            self.id = cur.execute("SELECT id FROM doctors "
+                            "WHERE name = '{}'".format(name)).fetchall()[0][0]
 
             request = cur.execute("SELECT title FROM dates "
-                                "WHERE doctor_id = {}".format(id[0][0])).fetchall()
+                                "WHERE doctor_id = {}".format(self.id)).fetchall()
             a = self.dates_list.clear()
             if len(request) != 0:
                 self.dates_list.addItems([item[0] for item in request])
 
             self.comboBox.addItems([item[0] for item in cur.execute("SELECT title FROM dates "
-                                                                "WHERE taken = 1 and doctor_id = {}".format(
-                id[0][0])).fetchall()])
-            print(id, [item[0] for item in cur.execute("SELECT title FROM dates "
-                                                   "WHERE taken = 1 and doctor_id = {}".format(id[0][0])).fetchall()])
-
+                                                                "WHERE taken = 1 and doctor_id = {}".format(self.id)).fetchall()])
 
     # Если картинки нет, то QPixmap будет пустым,
     # а исключения не будет
@@ -211,11 +112,9 @@ class AdminWindow(QMainWindow):
                                                                  self.experiense_line.text()))
             count = cur.execute(add_text)
             self.con.commit()
-            id = cur.execute("SELECT id FROM doctors "
-                             "WHERE name = '{}'".format(name)).fetchall()
             for x in self.dl:
                 add_text = ("INSERT INTO dates (title, doctor_id) "
-                            "VALUES ('{}', '{}')".format(x, id[0][0]))
+                            "VALUES ('{}', '{}')".format(x, self.id))
                 count = cur.execute(add_text)
                 self.con.commit()
             cur.close()
@@ -227,39 +126,40 @@ class AdminWindow(QMainWindow):
     # self.names_list.setCurrentItem(self.name_list.currentItem())
 
     def edit_button_click(self):
-        self.con = sqlite3.connect("clinic.sqlite")
-        name = self.name_line.text()
-        cur = self.con.cursor()
-        print(self.name_line.text(), self.prof_line.text(), self.education_line.text(), self.experiense_line.text())
-        result = cur.execute("UPDATE doctors "
+        if self.names_list.currentItem().text() != "Выбрать":
+            self.con = sqlite3.connect("clinic.sqlite")
+            name = self.name_line.text()
+            cur = self.con.cursor()
+            result = cur.execute("UPDATE doctors "
                              "SET name = '{}',prof = '{}', education = '{}', experience = '{}' "
                              "WHERE name = '{}'".format(name,
                                                         self.prof_line.text(),
                                                         self.education_line.text(),
                                                         self.experiense_line.text(),
                                                         self.names_list.currentItem().text())).fetchall()
-        self.con.commit()
-        cur.close()
-        self.names_list.currentItem().setText(name)
-
-    def delete_button_click(self):
-        self.con = sqlite3.connect("clinic.sqlite")
-        cur = self.con.cursor()
-        name = self.name_line.text()
-        if name.replace(" ", "") != "":
-            id = cur.execute("SELECT id FROM doctors "
-                             "WHERE name = '{}'".format(name)).fetchall()
-            result1 = cur.execute("DELETE from doctors WHERE name = '{}'".format(name)).fetchall()
-            self.con.commit()
-            result2 = cur.execute("DELETE from dates WHERE doctor_id = '{}'".format(id[0][0])).fetchall()
-            self.con.commit()
-            result3 = cur.execute("DELETE from clients "
-                                  "WHERE date_id = (SELECT id FROM dates "
-                                  "WHERE doctor_id = {})".format(id[0][0])).fetchall()
             self.con.commit()
             cur.close()
-            self.names_list.currentItem().setHidden(True)
-            self.clean_all()
+            self.names_list.currentItem().setText(name)
+
+    def delete_button_click(self):
+        if self.names_list.currentItem().text() != "Выбрать":
+            self.con = sqlite3.connect("clinic.sqlite")
+            cur = self.con.cursor()
+            name = self.names_list.currentItem().text()
+            if name.replace(" ", "") != "":
+                result1 = cur.execute("DELETE from doctors WHERE name = '{}'".format(name)).fetchall()
+                self.con.commit()
+                result2 = cur.execute("DELETE from dates WHERE doctor_id = '{}'".format(self.id)).fetchall()
+                self.con.commit()
+                a = cur.execute("SELECT id FROM dates WHERE doctor_id = {}".format(self.id)).fetchall()
+                #result3 = cur.execute("DELETE from clients "
+                #                  "WHERE date_id IN (SELECT id FROM dates "
+                #                  "WHERE doctor_id = {})".format(self.id)).fetchall()
+                self.con.commit()
+                print(а)
+                cur.close()
+                self.names_list.currentItem().setHidden(True)
+                self.clean_all()
 
     def change_date_info(self):
         try:
@@ -280,32 +180,29 @@ class AdminWindow(QMainWindow):
                 self.label_6.setText("Дата рождения: " + birthday)
                 self.label_7.setText("Цель приема: " + goal)
         except Exception as ex:
-            print(ex)
+            pass
 
     def date_add_button_click(self):
-        cur = self.con.cursor()
-        id = cur.execute("SELECT id FROM doctors "
-                        "WHERE name = '{}'".format(self.names_list.currentItem().text())).fetchall()
-        request = ("INSERT INTO dates (title, doctor_id) "
-                    "VALUES ('{}', '{}')".format(self.date_choose.text(), id[0][0]))
-        result = cur.execute(request).fetchall()
-        self.con.commit()
-        cur.close()
-        self.dates_list.addItem(self.date_choose.text())
-
-    def date_delete_button_click(self):
-        self.con = sqlite3.connect("clinic.sqlite")
-        cur = self.con.cursor()
-        cur_item = self.dates_list.currentItem().text()
-        if cur_item.replace(" ", "") != "":
-            if cur_item in self.dl:
-                a = self.dl.index(cur_item)
-                self.dl = self.dl[:a] + self.dl[a + 1:]
-            request = "DELETE from dates WHERE title = '{}'".format(self.dates_list.currentItem().text())
+        if self.names_list.currentItem().text() != "Выбрать":
+            cur = self.con.cursor()
+            request = ("INSERT INTO dates (title, doctor_id) "
+                   "VALUES ('{}', '{}')".format(self.date_choose.text(), self.id))
             result = cur.execute(request).fetchall()
             self.con.commit()
             cur.close()
-            self.dates_list.currentItem().setHidden(True)
+            self.dates_list.addItem(self.date_choose.text())
+
+    def date_delete_button_click(self):
+        if self.names_list.currentItem().text() != "Выбрать":
+            self.con = sqlite3.connect("clinic.sqlite")
+            cur = self.con.cursor()
+            cur_item = self.dates_list.currentItem().text()
+            if cur_item.replace(" ", "") != "":
+                request = "DELETE from dates WHERE title = '{}'".format(self.dates_list.currentItem().text())
+                result = cur.execute(request).fetchall()
+                self.con.commit()
+                cur.close()
+                self.dates_list.currentItem().setHidden(True)
 
     def photo_button_click(self):
         if self.comboBox.currentText() != "Выбрать":
@@ -322,8 +219,8 @@ class AdminWindow(QMainWindow):
         if self.comboBox.currentText() != "Выбрать":
             cur = self.con.cursor()
             textname = cur.execute("SELECT text FROM clients "
-                                "WHERE date_id = (SELECT id FROM dates "
-                                "WHERE title = '{}')".format(self.comboBox.currentText())).fetchall()[0][0]
+                                   "WHERE date_id = (SELECT id FROM dates "
+                                   "WHERE title = '{}')".format(self.comboBox.currentText())).fetchall()[0][0]
             self.TS = Text(textname)
             self.TS.show()
         else:
@@ -352,7 +249,7 @@ class MakeReception(QMainWindow):
         name = self.names_list.currentItem().text()
         cur = self.con.cursor()
         request = cur.execute("SELECT id, prof, education, experience FROM doctors "
-                                "WHERE name = '{}'".format(name)).fetchall()
+                              "WHERE name = '{}'".format(name)).fetchall()
         id = request[0][0]
         prof = request[0][1]
         education = request[0][2]
@@ -366,8 +263,8 @@ class MakeReception(QMainWindow):
         self.dates_list.clear()
 
         self.dates_list.addItems([item[0] for item in cur.execute("SELECT title FROM dates "
-                                                                    "WHERE doctor_id = {} and taken = 0".format(
-                id)).fetchall()])
+                                                                  "WHERE doctor_id = {} and taken = 0".format(
+            id)).fetchall()])
         self.photoname = None
         self.textname = None
 
@@ -376,16 +273,17 @@ class MakeReception(QMainWindow):
             cur = self.con.cursor()
             date_id = cur.execute("SELECT id FROM dates "
                                   "WHERE title = '{}'".format(self.dates_list.currentItem().text())).fetchall()
+            print(date_id)
             add_text = ("INSERT INTO clients (name, birthday, goal, photo, text, date_id) "
                         "VALUES ('{}', '{}', '{}', '{}', '{}', {})".format(self.name_label.text(),
-                                                                            self.birthday_label.text(),
-                                                                            self.goal_label.text(), self.photoname,
-                                                                            self.textname, date_id[0][0]))
+                                                                           self.birthday_label.text(),
+                                                                           self.goal_label.text(), self.photoname,
+                                                                           self.textname, date_id[0][0]))
             res = cur.execute(add_text).fetchall()
             self.con.commit()
             res = cur.execute("UPDATE dates "
-                                "SET taken = 1 "
-                                "WHERE id = '{}'".format(date_id[0][0])).fetchall()
+                              "SET taken = 1 "
+                              "WHERE id = '{}'".format(date_id[0][0])).fetchall()
             self.con.commit()
             QMessageBox.information(self, "Вы записаны", "Вы записались")
             self.photoname = None
@@ -440,10 +338,3 @@ class Text(QWidget):
                 self.text.setText(text)
         else:
             QMessageBox.information(self, "Нет файла", "Пользователь не приложил заключение", QMessageBox.Ok)
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = MainWindow()
-    ex.show()
-    sys.exit(app.exec())
