@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 import sqlite3
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap, QImage
+from  AdminWindow import  Ui_MainWindow
 
 WIDTH = 1200
 LENGTH = 1500
@@ -37,11 +38,11 @@ class MainWindow(QMainWindow):
             self.aw.show()
 
 
-class AdminWindow(QMainWindow):
+class AdminWindow(QMainWindow,  Ui_MainWindow):
     # Окно админа
     def __init__(self):
         super().__init__()
-        uic.loadUi("AdminWindow.ui", self)
+        self.setupUi(self)
 
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
