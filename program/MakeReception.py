@@ -177,7 +177,7 @@ class Ui_MakeReception(object):
         self.gridLayout_3.addWidget(self.groupBox_3, 15, 0, 1, 1)
         self.groupBox = QtWidgets.QGroupBox(self.groupBox_2)
         font = QtGui.QFont()
-        font.setFamily("SF UI Display")
+        font.setFamily("Malgun Gothi")
         font.setPointSize(12)
         self.groupBox.setFont(font)
         self.groupBox.setTitle("")
