@@ -19,7 +19,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.sizes = QImage("logo.jpg")
-        self.label.resize(self.sizes.width(), self.sizes.height())
+        self.label.resize(self.sizes.width() // 2, self.sizes.height() // 2)
         self.pixmap = QPixmap("logo.jpg")
         self.label.setPixmap(self.pixmap)
 
