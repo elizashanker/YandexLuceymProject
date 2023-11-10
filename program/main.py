@@ -13,7 +13,7 @@ LOGIN_LENGTH = LENGTH // 5
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    #Класс с главным окном
+    # Класс с главным окном
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.aw.show()
 
 
-class AdminWindow(QMainWindow,  Ui_Admin):
+class AdminWindow(QMainWindow, Ui_Admin):
     # Окно админа
     def __init__(self):
         super().__init__()
@@ -48,7 +48,9 @@ class AdminWindow(QMainWindow,  Ui_Admin):
 
         self.con = sqlite3.connect("clinic.sqlite")
         cur = self.con.cursor()
-        self.names_list.addItems([item[0] for item in cur.execute("SELECT name FROM doctors").fetchall()])
+        self.names_list.addItems(
+            [item[0] for item in cur.execute("SELECT name FROM doctors"
+                                             ).fetchall()])
 
         self.names_list.currentItemChanged.connect(self.change_name_info)
 
@@ -88,8 +90,10 @@ class AdminWindow(QMainWindow,  Ui_Admin):
             cur = self.con.cursor()
             name = self.names_list.currentItem().text()
 
-            result = cur.execute("SELECT name, prof, education, experience FROM doctors "
-                                "WHERE name = '{}'".format(name)).fetchall()
+            result = cur.execute(
+                "SELECT name, prof, education, "
+                "experience FROM doctors WHERE name = '{}'".format(name)
+            ).fetchall()
 
             self.name_line.setText(result[0][0])
             self.prof_line.setText(result[0][1])
@@ -97,18 +101,21 @@ class AdminWindow(QMainWindow,  Ui_Admin):
             self.experiense_line.setText(result[0][3])
 
             self.id = cur.execute("SELECT id FROM doctors "
-                            "WHERE name = '{}'".format(name)).fetchall()[0][0]
+                                  "WHERE name = '{}'".format(name)).fetchall()[0][0]
 
             request = cur.execute("SELECT title FROM dates "
-                                "WHERE doctor_id = {}".format(self.id)).fetchall()
+                                  "WHERE doctor_id = {}".format(self.id)).fetchall()
 
             self.dates_list.clear()
 
             if len(request) != 0:
                 self.dates_list.addItems([item[0] for item in request])
 
-            self.comboBox.addItems([item[0] for item in cur.execute("SELECT title FROM dates "
-                                                                "WHERE taken = 1 and doctor_id = {}".format(self.id)).fetchall()])
+            self.comboBox.addItems(
+                [item[0] for item in cur.execute(
+                    "SELECT title FROM dates "
+                    "WHERE taken = 1 and doctor_id = {}".format(self.id)
+                ).fetchall()])
 
     def new_button_click(self):
         # Добавление нового сотрудника при нажатии на кнопку
@@ -119,9 +126,9 @@ class AdminWindow(QMainWindow,  Ui_Admin):
 
         if not (name.replace(" ", "") == "") and flag and name != "Выбрать":
             count = cur.execute("INSERT INTO doctors (name, prof, education, experience) "
-                        "VALUES ('{}', '{}', '{}', '{}')".format(name, self.prof_line.text(),
-                                                                 self.education_line.text(),
-                                                                 self.experiense_line.text()))
+                                "VALUES ('{}', '{}', '{}', '{}')".format(name, self.prof_line.text(),
+                                                                         self.education_line.text(),
+                                                                         self.experiense_line.text()))
             self.con.commit()
             cur.close()
 
@@ -129,7 +136,9 @@ class AdminWindow(QMainWindow,  Ui_Admin):
             self.clean_all()
 
         elif not flag:
-            QMessageBox.critical(self, "Ошибка ", "Специалист с таким именем уже существует", QMessageBox.Ok)
+            QMessageBox.critical(self, "Ошибка ",
+                                 "Специалист с таким именем уже существует",
+                                 QMessageBox.Ok)
 
     def edit_button_click(self):
         # Изменение информации о специалисте при нажатии на кнопку
@@ -138,12 +147,12 @@ class AdminWindow(QMainWindow,  Ui_Admin):
             cur = self.con.cursor()
 
             result = cur.execute("UPDATE doctors "
-                             "SET name = '{}',prof = '{}', education = '{}', experience = '{}' "
-                             "WHERE name = '{}'".format(name,
-                                                        self.prof_line.text(),
-                                                        self.education_line.text(),
-                                                        self.experiense_line.text(),
-                                                        self.names_list.currentItem().text())).fetchall()
+                                 "SET name = '{}',prof = '{}', education = '{}', experience = '{}' "
+                                 "WHERE name = '{}'".format(name,
+                                                            self.prof_line.text(),
+                                                            self.education_line.text(),
+                                                            self.experiense_line.text(),
+                                                            self.names_list.currentItem().text())).fetchall()
             self.con.commit()
             cur.close()
 
@@ -162,10 +171,12 @@ class AdminWindow(QMainWindow,  Ui_Admin):
                                           "WHERE doctor_id = {})".format(self.id)).fetchall()
                     self.con.commit()
 
-                    result1 = cur.execute("DELETE from doctors WHERE name = '{}'".format(name)).fetchall()
+                    result1 = cur.execute("DELETE from doctors "
+                                          "WHERE name = '{}'".format(name)).fetchall()
                     self.con.commit()
 
-                    result2 = cur.execute("DELETE from dates WHERE doctor_id = '{}'".format(self.id)).fetchall()
+                    result2 = cur.execute("DELETE from dates "
+                                          "WHERE doctor_id = '{}'".format(self.id)).fetchall()
                     self.con.commit()
                     cur.close()
 
@@ -187,8 +198,8 @@ class AdminWindow(QMainWindow,  Ui_Admin):
             else:
 
                 cur = self.con.cursor()
-                date_id = cur.execute("SELECT id FROM dates "
-                                      "WHERE title = '{}'".format(self.comboBox.currentText())).fetchall()
+                date_id = (cur.execute("SELECT id FROM dates "
+                                       "WHERE title = '{}'".format(self.comboBox.currentText())).fetchall())
 
                 request = cur.execute("SELECT name, birthday, goal FROM clients "
                                       "WHERE date_id = {}".format(date_id[0][0])).fetchall()
@@ -208,17 +219,18 @@ class AdminWindow(QMainWindow,  Ui_Admin):
         # Добавляет сеанс врачу
         try:
             if self.names_list.currentItem().text() != "Выбрать":
-
                 cur = self.con.cursor()
                 request = ("INSERT INTO dates (title, doctor_id) "
-                    "VALUES ('{}', '{}')".format(self.date_choose.text(), self.id))
+                           "VALUES ('{}', '{}')".format(self.date_choose.text(), self.id))
                 result = cur.execute(request).fetchall()
                 self.con.commit()
                 cur.close()
 
                 self.dates_list.addItem(self.date_choose.text())
         except:
-            QMessageBox.critical(self, "Ошибка ", "Такого специалиста еще не существует", QMessageBox.Ok)
+            QMessageBox.critical(self, "Ошибка ",
+                                 "Такого специалиста еще не существует",
+                                 QMessageBox.Ok)
 
     def date_delete_button_click(self):
         # Удаляет сеанс у врача
@@ -227,19 +239,26 @@ class AdminWindow(QMainWindow,  Ui_Admin):
                 cur = self.con.cursor()
                 cur_item = self.dates_list.currentItem().text()
 
-                flag = len(cur.execute("SELECT title FROM dates WHERE title = '{}' AND taken = 1".format(cur_item)).fetchall()) != 1
+                flag = len(cur.execute(
+                    "SELECT title FROM dates "
+                    "WHERE title = '{}' AND taken = 1".format(cur_item)).fetchall()) != 1
 
                 if flag:
-                    request = "DELETE from dates WHERE title = '{}'".format(cur_item)
+                    request = ("DELETE from dates "
+                               "WHERE title = '{}'").format(cur_item)
                     result = cur.execute(request).fetchall()
                     self.con.commit()
                     cur.close()
 
                     self.dates_list.currentItem().setHidden(True)
                 else:
-                    QMessageBox.critical(self, "Ошибка ", "Нельзя удалить сеанс, на который записались", QMessageBox.Ok)
+                    QMessageBox.critical(self, "Ошибка ",
+                                         "Нельзя удалить сеанс, на который записались",
+                                         QMessageBox.Ok)
         except Exception as ex:
-            QMessageBox.critical(self, "Ошибка ", "Такого специалиста еще не существует", QMessageBox.Ok)
+            QMessageBox.critical(self, "Ошибка ",
+                                 "Такого специалиста еще не существует",
+                                 QMessageBox.Ok)
 
     def photo_button_click(self):
         # Открывает окно с фото
@@ -253,7 +272,9 @@ class AdminWindow(QMainWindow,  Ui_Admin):
             self.ps.show()
 
         else:
-            QMessageBox.critical(self, "Ошибка ", "Вы не выбрали приём", QMessageBox.Ok)
+            QMessageBox.critical(self, "Ошибка ",
+                                 "Вы не выбрали приём",
+                                 QMessageBox.Ok)
 
     def text_button_click(self):
         # Открывает окно с текстом
@@ -269,7 +290,9 @@ class AdminWindow(QMainWindow,  Ui_Admin):
 
         else:
 
-            QMessageBox.critical(self, "Ошибка ", "Вы не выбрали приём", QMessageBox.Ok)
+            QMessageBox.critical(self, "Ошибка ",
+                                 "Вы не выбрали приём",
+                                 QMessageBox.Ok)
 
 
 class MakeReception(QMainWindow, Ui_MakeReception):
@@ -280,7 +303,8 @@ class MakeReception(QMainWindow, Ui_MakeReception):
         self.con = sqlite3.connect("clinic.sqlite")
 
         cur = self.con.cursor()
-        self.names_list.addItems([item[0] for item in cur.execute("SELECT name FROM doctors").fetchall()])
+        self.names_list.addItems(
+            [item[0] for item in cur.execute("SELECT name FROM doctors").fetchall()])
 
         self.photoname = None
         self.textname = None
@@ -310,18 +334,20 @@ class MakeReception(QMainWindow, Ui_MakeReception):
 
         self.dates_list.clear()
 
-        self.dates_list.addItems([item[0] for item in cur.execute("SELECT title FROM dates "
-                                                                  "WHERE doctor_id = {} and taken = 0".format(id)).fetchall()])
+        self.dates_list.addItems(
+            [item[0] for item in cur.execute(
+                "SELECT title FROM dates "
+                "WHERE doctor_id = {} and taken = 0".format(id)).fetchall()])
         self.photoname = None
         self.textname = None
 
     def make_button_click(self):
-        #Создает запись
+        # Создает запись
         if self.dates_list.currentItem() is not None:
-
             cur = self.con.cursor()
             date_id = cur.execute("SELECT id FROM dates "
-                                  "WHERE title = '{}'".format(self.dates_list.currentItem().text())).fetchall()
+                                  "WHERE title = '{}'".format(
+                self.dates_list.currentItem().text())).fetchall()
 
             add_text = ("INSERT INTO clients (name, birthday, goal, photo, text, date_id) "
                         "VALUES ('{}', '{}', '{}', '{}', '{}', {})".format(self.name_label.text(),
@@ -336,7 +362,8 @@ class MakeReception(QMainWindow, Ui_MakeReception):
                               "WHERE id = '{}'".format(date_id[0][0])).fetchall()
             self.con.commit()
 
-            QMessageBox.information(self, "Вы записаны", "Вы записались")
+            QMessageBox.information(self, "Вы записаны",
+                                    "Вы записались")
 
             self.photoname = None
             self.textname = None
@@ -375,7 +402,9 @@ class Photo(QWidget):
             self.image.setPixmap(self.pixmap)
         else:
             print(self.photoname)
-            QMessageBox.information(self, "Нет файла", "Пользователь не приложил результаты анализов", QMessageBox.Ok)
+            QMessageBox.information(self, "Нет файла",
+                                    "Пользователь не приложил результаты анализов",
+                                    QMessageBox.Ok)
 
 
 class Text(QWidget):
@@ -396,6 +425,8 @@ class Text(QWidget):
                     text = f.read()
                     self.text.setText(text)
             else:
-                QMessageBox.information(self, "Нет файла", "Пользователь не приложил заключение", QMessageBox.Ok)
+                QMessageBox.information(self, "Нет файла",
+                                        "Пользователь не приложил заключение",
+                                        QMessageBox.Ok)
         except:
             pass
