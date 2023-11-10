@@ -1,4 +1,5 @@
 from main import *
+import sys
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
